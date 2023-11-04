@@ -1,0 +1,214 @@
+<template>
+  <q-page>
+    <div class="main__page">
+      <div class="main__page-top">
+        <div class="big-title">Ваши заметки</div>
+        <main-button class="main__page-add" @click="modals.add = true">Новая заметка +</main-button>
+      </div>
+      <div class="main__page-noty">
+        <NotifyCard @editNoty="editNoty" @deleteNotyModal="deleteNotyModal" v-for="todo in userTodos.todos" :key="todo"
+          :item="todo" />
+      </div>
+      <StandartModal :active="modals.edit" :title="'Редактировать заметку'" @closeModal="closeModalEdit">
+        <div class="modal-wrapper">
+          <div class="custom-input">
+            Контент
+            <q-input outlined bg-color="white" color="white"></q-input>
+          </div>
+
+          <div class="modal-buttons">
+            <main-button :isDark="true" @click="modals.edit = false">Отмена</main-button>
+            <main-button @click="editNotyf">Редактировать</main-button>
+          </div>
+        </div>
+      </StandartModal>
+      <StandartModal :active="modals.delete" :title="'Вы уверены, что хотите удалить заметку?'"
+        @closeModal="closeModalDelete">
+        <div class="modal-wrapper">
+          <div class="modal-buttons">
+            <main-button :isDark="true" @click="modals.delete = false">Отмена</main-button>
+            <main-button :isRed="true" @click="deleteNoty">Удалить</main-button>
+          </div>
+        </div>
+      </StandartModal>
+      <StandartModal :active="modals.add" :title="'Новая заметка'" @closeModal="closeModalAdd">
+        <div class="modal-wrapper">
+          <div class="custom-input">
+            Контент
+            <q-input v-model="addNotyVal.todo" outlined bg-color="white" color="white"></q-input>
+          </div>
+          <div class="modal-buttons">
+            <main-button :isDark="true" @click="modals.add = false">Отмена</main-button>
+            <main-button @click="addNoty">Добавить</main-button>
+          </div>
+        </div>
+      </StandartModal>
+    </div>
+  </q-page>
+</template>
+
+<script setup>
+import NotifyCard from 'src/components/NotifyCard/NotifyCard.vue'
+import MainButton from 'src/components/MainButton.vue';
+import StandartModal from 'src/components/Modals/StandartModal.vue';
+import { ref, onMounted, computed } from 'vue'
+import { api } from 'boot/axios'
+import { useStore } from 'vuex';
+const store = useStore();
+
+const user = computed(() => store.getters.getUser)
+const token = computed(() => store.getters.getToken)
+onMounted(() => {
+  takeItems()
+})
+const modals = ref({
+  edit: false,
+  delete: false,
+  add: false,
+})
+const addNotyVal = ref({
+  todo: null,
+  completed: false,
+})
+const userTodos = ref([]);
+const currentNoty = ref({
+  id: null,
+})
+const canLoad = ref({
+  add: true,
+  edit: true,
+  delete: true,
+})
+const deleteNotyModal = (id) => {
+  currentNoty.value.id = id
+  console.log(currentNoty.value.id)
+  modals.value.delete = true
+}
+const deleteNoty = () => {
+  if (!canLoad.value.delete) {
+    return
+  }
+  canLoad.value.delete = false
+  api.delete(`/todos/${currentNoty.value.id}`).then((res) => {
+    console.log(res)
+    userTodos.value.todos.forEach((el, index) => {
+      if (el.id === currentNoty.value.id) {
+        userTodos.value.todos.splice(index, 1);
+      }
+    })
+    modals.value.delete = false
+    canLoad.value.delete = true
+
+  }).catch((err) => {
+    canLoad.value.delete = false
+    console.log(err)
+    modals.value.delete = false
+  })
+}
+const addNoty = () => {
+  if (!canLoad.value.add) {
+    return
+  }
+  canLoad.value.add = false
+  api.post('/todos/add', {
+    todo: addNotyVal.value.todo,
+    completed: false,
+    userId: user.value.id,
+  }).then((res) => {
+
+    console.log()
+    addNotyVal.value.todo = null;
+    userTodos.value.todos = [...userTodos.value.todos, res.data]
+    modals.value.add = false
+    canLoad.value.add = true
+
+  }).catch((err) => {
+    console.log(err)
+    modals.value.add = false
+
+  })
+}
+
+const editNotyf = () => {
+
+  if (!canLoad.value.edit) {
+    return
+  }
+  canLoad.value.edit = false
+  api.put(`/todos/${currentNoty.value.id}`, {
+    completed: false,
+  }).then((res) => {
+    console.log(res)
+    canLoad.value.edit = true
+  }).catch((err) => {
+    console.log(err)
+    canLoad.value.edit = true
+  })
+}
+const editNoty = (id) => {
+  currentNoty.value.id = id
+  modals.value.edit = true
+}
+const takeItems = () => {
+  api.get(`/todos/user/${user.value.id}`).then((res) => {
+    console.log(res.data)
+    userTodos.value = res.data
+  }).catch((err) => {
+    // alert(err)s
+  })
+}
+
+// 
+
+const closeModalEdit = () => {
+  modals.value.edit = false
+}
+
+const closeModalDelete = () => {
+  modals.value.delete = false
+}
+const closeModalAdd = () => {
+  modals.value.add = false
+}
+</script>
+<style scoped>
+.main__page-add {
+  max-width: 170px;
+}
+
+.main__page-top {
+  display: flex;
+  margin-top: 60px;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.main__page-noty {
+  gap: 64px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 60px;
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.modal-wrapper {
+  display: flex;
+  gap: 20px;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.custom-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #FCFCFC;
+}
+</style>

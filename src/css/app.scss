@@ -1,0 +1,27 @@
+// app global css in SCSS form
+@font-face {
+    font-family: 'Montserrat';
+    src: url('../assets/fonts/static/Montserrat-Regular.ttf') ;
+    font-weight: normal;
+    font-style: normal;
+  }
+ *{
+    font-family: 'Montserrat';
+    box-sizing: border-box;
+ }
+.q-toolbar{
+   max-width: 1280px;
+   margin: 0 auto;
+}
+.q-page-container{
+   max-width: 1280px;
+   margin: 0 auto;
+}
+.big-title{
+   font-size: 48px;
+   font-weight: 600;
+   line-height: 60px;
+   letter-spacing: -0.02em;
+   color: #FCFCFC;
+
+}
