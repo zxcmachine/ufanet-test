@@ -7,10 +7,12 @@
                 <div class="subtitle">Введите ваш логин и пароль</div>
             </div>
             <div class="middle">
-                Логин ( kminchelle ) админ ()
-                <q-input :error="errors.username" v-model="username" outlined bg-color="white" color="white"></q-input>
-                Пароль ( 0lelplR ) админ ()
-                <q-input :error="errors.password" v-model="password" type="password" outlined bg-color="white"
+                Логин ( kminchelle ) админ (atuny0)
+                {{ logins.username }}
+                <q-input :error="errors.username" v-model="logins.username" outlined bg-color="white"
+                    color="white"></q-input>
+                Пароль ( 0lelplR ) админ (9uQFF1Lh)
+                <q-input :error="errors.password" v-model="logins.password" type="password" outlined bg-color="white"
                     color="white"></q-input>
             </div>
             <MainButton @click="fetchUser" class="auth-button">Войти</MainButton>
@@ -20,72 +22,44 @@
 
 <script setup>
 import { ref, watch } from 'vue'
-import { api } from 'boot/axios'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import MainButton from 'src/components/MainButton.vue'
 import TestImg from 'src/components/img/TestImg.vue'
-import { LocalStorage } from 'quasar'
-const router = useRouter()
-const username = ref(null)
-const password = ref(null)
+const logins = ref({
+    username: null,
+    password: null,
+})
+
 const errors = ref({
     username: false,
     password: false,
 })
-
-watch(username, () => {
-    errors.value.username = false
-    errors.value.password = false
-});
-watch(password, () => {
-    errors.value.username = false
-    errors.value.password = false
+watch([() => logins.value.username, () => logins.value.password], () => {
+    errors.value.username = false;
+    errors.value.password = false;
 });
 const validate = () => {
-    if (username.value === '' || username.value === null | username.value === undefined) {
-        errors.value.username = true
-        return false
+    if (logins.value.username === '' || logins.value.username === null || logins.value.username === undefined) {
+        errors.value.username = true;
+        return false;
     }
-    if (password.value === '' || password.value === null | password.value === undefined) {
-        errors.value.password = true
-        return false
+    if (logins.value.password === '' || logins.value.password === null || logins.value.password === undefined) {
+        errors.value.password = true;
+        return false;
     }
-    return true
+    return true;
 }
 const store = useStore();
-
 const fetchUser = () => {
     if (!validate()) {
         return
     }
-    api.post('/auth/login', {
-        username: username.value.trim(),
-        password: password.value.trim()
-    }).then((res) => {
-        console.log(res.data)
-        const token = res.data.token
-        const user = {
-            name: res.data.firstName,
-            email: res.data.email,
-            role: 'user',
-            id: res.data.id,
-            image: res.data.image,
-            username: res.data.username,
+    store.dispatch('fetchUser', logins.value).catch((err) => {
+        if (err.response.status === 400) {
+            errors.value.username = true
+            errors.value.password = true
         }
-        store.commit('updateUser', user);
-        store.commit('updateToken', token);
-        localStorage.setItem('authToken', token)
-        const logins = {
-            username: username.value,
-            password: password.value
-        }
-        localStorage.setItem('logins', logins) // это костыль на перепроверку юзера
-        router.push('/')
-    }).catch((err) => {
-        console.log(err)
-        errors.value.username = true
-        errors.value.password = true
     })
 }
 

@@ -54,9 +54,12 @@ import StandartModal from 'src/components/Modals/StandartModal.vue';
 import { ref, onMounted, computed } from 'vue'
 import { api } from 'boot/axios'
 import { useStore } from 'vuex';
+import { useQuasar } from 'quasar'
+const $q = useQuasar()
 const store = useStore();
 
 const user = computed(() => store.getters.getUser)
+const userLc = localStorage.getItem('logins')
 const token = computed(() => store.getters.getToken)
 onMounted(() => {
   takeItems()
@@ -89,6 +92,9 @@ const deleteNoty = () => {
     return
   }
   canLoad.value.delete = false
+  $q.loading.show({
+    delay: 1 // ms
+  })
   api.delete(`/todos/${currentNoty.value.id}`).then((res) => {
     console.log(res)
     userTodos.value.todos.forEach((el, index) => {
@@ -98,8 +104,9 @@ const deleteNoty = () => {
     })
     modals.value.delete = false
     canLoad.value.delete = true
-
+    $q.loading.hide()
   }).catch((err) => {
+    $q.loading.hide()
     canLoad.value.delete = false
     console.log(err)
     modals.value.delete = false
@@ -109,23 +116,25 @@ const addNoty = () => {
   if (!canLoad.value.add) {
     return
   }
+  $q.loading.show({
+    delay: 1 // ms
+  })
   canLoad.value.add = false
   api.post('/todos/add', {
     todo: addNotyVal.value.todo,
     completed: false,
     userId: user.value.id,
   }).then((res) => {
-
-    console.log()
+    $q.loading.hide()
     addNotyVal.value.todo = null;
     userTodos.value.todos = [...userTodos.value.todos, res.data]
     modals.value.add = false
     canLoad.value.add = true
 
   }).catch((err) => {
+    $q.loading.hide()
     console.log(err)
     modals.value.add = false
-
   })
 }
 
@@ -134,13 +143,18 @@ const editNotyf = () => {
   if (!canLoad.value.edit) {
     return
   }
+  $q.loading.show({
+    delay: 1 // ms
+  })
   canLoad.value.edit = false
   api.put(`/todos/${currentNoty.value.id}`, {
     completed: false,
   }).then((res) => {
     console.log(res)
+    $q.loading.hide()
     canLoad.value.edit = true
   }).catch((err) => {
+    $q.loading.hide()
     console.log(err)
     canLoad.value.edit = true
   })
@@ -150,10 +164,15 @@ const editNoty = (id) => {
   modals.value.edit = true
 }
 const takeItems = () => {
-  api.get(`/todos/user/${user.value.id}`).then((res) => {
+  $q.loading.show({
+    delay: 1 // ms
+  })
+  api.get(`/todos/user/${JSON.parse(userLc).id}`).then((res) => {
     console.log(res.data)
     userTodos.value = res.data
+    $q.loading.hide()
   }).catch((err) => {
+    $q.loading.hide()
     // alert(err)s
   })
 }

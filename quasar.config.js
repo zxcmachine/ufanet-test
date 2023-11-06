@@ -104,7 +104,7 @@ module.exports = configure(function (ctx) {
 
 
       // Quasar plugins
-      plugins: []
+      plugins: ['Loading']
     },
 
     // animations: 'all', // --- includes all animations

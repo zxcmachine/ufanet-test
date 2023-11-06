@@ -54,6 +54,7 @@ const props = defineProps(['item'])
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
+    cursor: pointer;
 }
 
 .card-edit {
@@ -61,5 +62,6 @@ const props = defineProps(['item'])
     font-size: 16px;
     font-weight: 600;
     line-height: 24px;
+    cursor: pointer;
 }
 </style>
