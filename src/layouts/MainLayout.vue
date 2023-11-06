@@ -2,8 +2,10 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated class="bg-dark">
       <q-toolbar class="header-toolbar">
-        <q-toolbar-title>
-          <router-link class="active" to="/"> noty </router-link>
+        <q-toolbar-title class="header__links-wrapper">
+          <a href="#" class="header__links-link"> noty </a>
+          <router-link class="header__links-link" to="/" v-if="user.role == 'admin'"> Заметки пользователей </router-link>
+          <router-link class="header__links-link" to="/users" v-if="user.role == 'admin'"> Пользователи </router-link>
         </q-toolbar-title>
         <div class="flex header-items">
           <div class="header-icon"><img :src="user.image" alt="image"></div>
@@ -26,7 +28,7 @@
 
 <script setup>
 import TestImg from 'src/components/img/TestImg.vue';
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
@@ -41,6 +43,17 @@ const logout = () => {
 </script>
 
 <style scoped>
+.header__links-wrapper{
+  display: flex;
+  gap: 10px;
+}
+.header__links-link{
+  color: white;
+  text-decoration: none;
+}
+.header__links-link.router-link-active{
+  color: #005FF9;
+}
 .header-icon {
   max-width: 48px;
   max-height: 48px;

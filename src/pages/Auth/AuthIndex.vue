@@ -8,7 +8,6 @@
             </div>
             <div class="middle">
                 Логин ( kminchelle ) админ (atuny0)
-                {{ logins.username }}
                 <q-input :error="errors.username" v-model="logins.username" outlined bg-color="white"
                     color="white"></q-input>
                 Пароль ( 0lelplR ) админ (9uQFF1Lh)
@@ -23,7 +22,6 @@
 <script setup>
 import { ref, watch } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 import MainButton from 'src/components/MainButton.vue'
 import TestImg from 'src/components/img/TestImg.vue'
 const logins = ref({
@@ -38,7 +36,7 @@ const errors = ref({
 watch([() => logins.value.username, () => logins.value.password], () => {
     errors.value.username = false;
     errors.value.password = false;
-});
+})
 const validate = () => {
     if (logins.value.username === '' || logins.value.username === null || logins.value.username === undefined) {
         errors.value.username = true;

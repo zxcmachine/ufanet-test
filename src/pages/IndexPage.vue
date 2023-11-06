@@ -13,12 +13,12 @@
         <div class="modal-wrapper">
           <div class="custom-input">
             Контент
-            <q-input outlined bg-color="white" color="white"></q-input>
+            <q-input :error="errors.edit" v-model="editNotyInput" outlined bg-color="white" color="white"></q-input>
           </div>
 
           <div class="modal-buttons">
             <main-button :isDark="true" @click="modals.edit = false">Отмена</main-button>
-            <main-button @click="editNotyf">Редактировать</main-button>
+            <main-button @click="editNotyf('')">Редактировать</main-button>
           </div>
         </div>
       </StandartModal>
@@ -35,7 +35,7 @@
         <div class="modal-wrapper">
           <div class="custom-input">
             Контент
-            <q-input v-model="addNotyVal.todo" outlined bg-color="white" color="white"></q-input>
+            <q-input :error="errors.add" v-model="addNotyVal.todo" outlined bg-color="white" color="white"></q-input>
           </div>
           <div class="modal-buttons">
             <main-button :isDark="true" @click="modals.add = false">Отмена</main-button>
@@ -51,7 +51,7 @@
 import NotifyCard from 'src/components/NotifyCard/NotifyCard.vue'
 import MainButton from 'src/components/MainButton.vue';
 import StandartModal from 'src/components/Modals/StandartModal.vue';
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { api } from 'boot/axios'
 import { useStore } from 'vuex';
 import { useQuasar } from 'quasar'
@@ -69,6 +69,10 @@ const modals = ref({
   delete: false,
   add: false,
 })
+const editNotyInput = ref(null)
+watch(() => editNotyInput.value, () => {
+    errors.value.edit = false;
+})
 const addNotyVal = ref({
   todo: null,
   completed: false,
@@ -77,6 +81,13 @@ const userTodos = ref([]);
 const currentNoty = ref({
   id: null,
 })
+
+const errors = ref({
+  add: false,
+  edit: false,
+  delete: false,
+})
+
 const canLoad = ref({
   add: true,
   edit: true,
@@ -113,7 +124,8 @@ const deleteNoty = () => {
   })
 }
 const addNoty = () => {
-  if (!canLoad.value.add) {
+  if (!canLoad.value.add || addNotyVal.value.todo == '' || addNotyVal.value.todo == null) {
+    errors.value.add = true
     return
   }
   $q.loading.show({
@@ -130,17 +142,19 @@ const addNoty = () => {
     userTodos.value.todos = [...userTodos.value.todos, res.data]
     modals.value.add = false
     canLoad.value.add = true
-
+    errors.value.add = false
   }).catch((err) => {
     $q.loading.hide()
     console.log(err)
     modals.value.add = false
+    errors.value.add = false
+
   })
 }
 
 const editNotyf = () => {
-
-  if (!canLoad.value.edit) {
+  if (!canLoad.value.edit && editNotyInput.value == '' || editNotyInput.value == null) {
+    errors.value.edit = true
     return
   }
   $q.loading.show({
@@ -150,13 +164,19 @@ const editNotyf = () => {
   api.put(`/todos/${currentNoty.value.id}`, {
     completed: false,
   }).then((res) => {
-    console.log(res)
+    if(userTodos.value.todos.find(todo => todo.id === currentNoty.value.id)){
+      userTodos.value.todos.find(todo => todo.id === currentNoty.value.id).todo = editNotyInput.value
+    }
     $q.loading.hide()
     canLoad.value.edit = true
+    modals.value.edit = false
+    editNotyInput.value = null
   }).catch((err) => {
     $q.loading.hide()
     console.log(err)
     canLoad.value.edit = true
+    modals.value.edit = false
+    editNotyInput.value = null
   })
 }
 const editNoty = (id) => {
@@ -173,16 +193,11 @@ const takeItems = () => {
     $q.loading.hide()
   }).catch((err) => {
     $q.loading.hide()
-    // alert(err)s
   })
 }
-
-// 
-
 const closeModalEdit = () => {
   modals.value.edit = false
 }
-
 const closeModalDelete = () => {
   modals.value.delete = false
 }

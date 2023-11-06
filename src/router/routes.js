@@ -18,6 +18,14 @@ const routes = [
       { path: '', component: () => import('src/pages/Auth/AuthIndex.vue') }
     ]
   },
+  {
+    path: '/users',
+    beforeEnter: authCheck,
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      { path: '', component: () => import('src/pages/User/UserList.vue') }
+    ]
+  },
   // Always leave this as last one,
   // but you can also remove it
   {
