@@ -1,4 +1,5 @@
 import authCheck from "./middlewares/accept";
+import reauthCheck from "./middlewares/reacept";
 import isAdminMiddleware from "./middlewares/checkRole";
 
 const routes = [
@@ -10,6 +11,7 @@ const routes = [
   },
   {
     path: "/auth",
+    beforeEnter: reauthCheck,
     component: () => import("layouts/AuthLayout.vue"),
     children: [
       { path: "", component: () => import("src/pages/Auth/AuthIndex.vue") },
@@ -17,7 +19,7 @@ const routes = [
   },
   {
     path: "/users",
-    beforeEnter: isAdminMiddleware,
+    beforeEnter: [isAdminMiddleware, authCheck],
     component: () => import("layouts/MainLayout.vue"),
     children: [
       { path: "", component: () => import("src/pages/User/UserList.vue") },
