@@ -42,6 +42,7 @@ const props = defineProps(['active', 'title'])
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 21;
 }
 
 .modal-content {

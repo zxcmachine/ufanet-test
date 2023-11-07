@@ -115,7 +115,7 @@ const closeModalAdd = () => {
   modals.value.add = false;
 };
 const closeModalDelete = () => {
-  modals.value.add = false;
+  modals.value.delete = false;
 };
 const userList = ref([]);
 
@@ -165,6 +165,7 @@ const addUser = () => {
       role: "user",
       image: "https://robohash.org/doloremquesintcorrupti.png",
       status: false,
+      count: 0,
     })
     .then((res) => {
       console.log(res);
@@ -299,6 +300,7 @@ const editStatus = (id, statusId) => {
   display: flex;
   flex-wrap: wrap;
   margin-top: 60px;
+  margin-bottom: 60px;
 }
 
 .modal-buttons {

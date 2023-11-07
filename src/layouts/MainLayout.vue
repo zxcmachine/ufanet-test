@@ -79,7 +79,9 @@ const logout = () => {
   flex-direction: column;
   justify-content: center;
 }
-
+.header-logout{
+  cursor: pointer;
+}
 .header-text {
   display: flex;
 }

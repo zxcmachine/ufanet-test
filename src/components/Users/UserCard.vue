@@ -129,6 +129,7 @@ const statuses = ref({
   max-width: 250px;
   padding: 13px 24px;
   margin-left: auto;
+  cursor: pointer;
 }
 .select {
   background-color: white;

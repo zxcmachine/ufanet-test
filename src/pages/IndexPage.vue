@@ -231,6 +231,7 @@ const closeModalAdd = () => {
   display: flex;
   flex-wrap: wrap;
   margin-top: 60px;
+  margin-bottom: 60px;
 }
 
 .modal-buttons {
