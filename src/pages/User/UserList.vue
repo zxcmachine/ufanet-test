@@ -53,6 +53,7 @@
             outlined
             bg-color="white"
             color="white"
+            :error="errors.username"
           ></q-input>
         </div>
         <div class="custom-input">
@@ -60,6 +61,7 @@
           <q-input
             v-model="registerUser.password"
             outlined
+            :error="errors.password"
             bg-color="white"
             color="white"
           ></q-input>
@@ -78,7 +80,7 @@
 import UserCard from "src/components/Users/UserCard.vue";
 import MainButton from "src/components/MainButton.vue";
 import StandartModal from "src/components/Modals/StandartModal.vue";
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useQuasar } from "quasar";
 import { api } from "boot/axios";
 const currentUser = ref({
@@ -94,6 +96,11 @@ const registerUser = ref({
   username: null,
   password: null,
 });
+
+watch([() => registerUser.value.username, () => registerUser.value.password], () => {
+    errors.value.username = false;
+    errors.value.password = false;
+})
 const errors = ref({
   username: false,
   password: false,
@@ -142,7 +149,9 @@ const takeItems = () => {
 };
 
 const addUser = () => {
-  if (!canLoad.value.add) {
+  if (!canLoad.value.add || registerUser.value.username == '' || registerUser.value.username == null || registerUser.value.password == '' || registerUser.value.password == null) {
+    errors.value.username = true
+    errors.value.password = true
     return;
   }
   canLoad.value.add = false;
