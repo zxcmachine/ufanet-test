@@ -2,8 +2,10 @@
   <q-page>
     <div class="main__page">
       <div class="main__page-top">
-        <div class="big-title">Ваши заметки</div>
-        <main-button class="main__page-add" @click="modals.add = true">Новая заметка +</main-button>
+        <div class="big-title" v-if="user.role == 'user'">Ваши заметки</div>
+        <div class="big-title" v-else>Заметки пользователей</div>
+
+        <main-button  v-if="user.role == 'user'" class="main__page-add" @click="modals.add = true">Новая заметка +</main-button>
       </div>
       <div class="main__page-noty">
         <NotifyCard @editNoty="editNoty" @deleteNotyModal="deleteNotyModal" v-for="todo in userTodos.todos" :key="todo"
@@ -57,10 +59,7 @@ import { useStore } from 'vuex';
 import { useQuasar } from 'quasar'
 const $q = useQuasar()
 const store = useStore();
-
 const user = computed(() => store.getters.getUser)
-const userLc = localStorage.getItem('logins')
-const token = computed(() => store.getters.getToken)
 onMounted(() => {
   takeItems()
 })
@@ -104,7 +103,7 @@ const deleteNoty = () => {
   }
   canLoad.value.delete = false
   $q.loading.show({
-    delay: 1 // ms
+    delay: 1 
   })
   api.delete(`/todos/${currentNoty.value.id}`).then((res) => {
     console.log(res)
@@ -129,7 +128,7 @@ const addNoty = () => {
     return
   }
   $q.loading.show({
-    delay: 1 // ms
+    delay: 1
   })
   canLoad.value.add = false
   api.post('/todos/add', {
@@ -158,7 +157,7 @@ const editNotyf = () => {
     return
   }
   $q.loading.show({
-    delay: 1 // ms
+    delay: 1 
   })
   canLoad.value.edit = false
   api.put(`/todos/${currentNoty.value.id}`, {
@@ -185,15 +184,25 @@ const editNoty = (id) => {
 }
 const takeItems = () => {
   $q.loading.show({
-    delay: 1 // ms
+    delay: 1 
   })
-  api.get(`/todos/user/${JSON.parse(userLc).id}`).then((res) => {
+  if(user.value.role == 'user'){
+  api.get(`/todos/user/${user.value.id}`).then((res) => {
     console.log(res.data)
+    userTodos.value = res.data
+    $q.loading.hide()
+  }).catch((err) => {
+    console.log(err)
+    $q.loading.hide()
+  })
+}else{
+  api.get(`/todos`).then((res) => {
     userTodos.value = res.data
     $q.loading.hide()
   }).catch((err) => {
     $q.loading.hide()
   })
+}
 }
 const closeModalEdit = () => {
   modals.value.edit = false

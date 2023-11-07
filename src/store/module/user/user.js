@@ -1,7 +1,7 @@
 import { api } from 'boot/axios'
 export default {
     state: {
-        user: '',
+        user: JSON.parse(localStorage.getItem('logins')) ? JSON.parse(localStorage.getItem('logins')) : null,
         token: '',
     },
     getters: {
@@ -41,7 +41,7 @@ export default {
                         id: res.data.id,
                         image: res.data.image,
                         username: res.data.username,
-                    };
+                    }
                     ctx.commit('updateUser', user);
                     ctx.commit('updateToken', token);
                     localStorage.setItem('authToken', token);
